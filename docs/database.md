@@ -131,3 +131,60 @@ if __name__ == "__main__":
 
 2. **Include Category in Recipe Forms**:
    Add a dropdown to select the category when creating or editing a recipe.
+
+## Database Structure
+
+```mermaid
+erDiagram
+    USERS {
+        INT id PK
+        VARCHAR username UNIQUE
+        VARCHAR password_hash
+        VARCHAR email
+        TIMESTAMP created_at
+    }
+
+    RECIPES {
+        INT id PK
+        VARCHAR name
+        TEXT notes
+        VARCHAR image
+        VARCHAR author
+        INT category_id FK
+        INT serves
+        BOOLEAN is_favorite
+    }
+
+    IMAGES {
+        INT id PK
+        INT recipe_id FK
+        VARCHAR image
+        VARCHAR image_description
+        INT image_order_number
+    }
+
+    INSTRUCTIONS {
+        INT id PK
+        INT recipe_id FK
+        INT instruction_id
+        INT instruction_order
+        TEXT instruction_step
+    }
+
+    INGREDIENTS {
+        INT id PK
+        INT recipe_id FK
+        TEXT quantity
+        VARCHAR ingredient_name
+    }
+
+    CATEGORIES {
+        INT id PK
+        VARCHAR name UNIQUE
+    }
+
+    RECIPES ||--o{ IMAGES : "has"
+    RECIPES ||--o{ INSTRUCTIONS : "has"
+    RECIPES ||--o{ INGREDIENTS : "has"
+    CATEGORIES ||--o{ RECIPES : "has"
+```
