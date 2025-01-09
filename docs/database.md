@@ -133,6 +133,7 @@ if __name__ == "__main__":
    Add a dropdown to select the category when creating or editing a recipe.
 
 ## Database Structure
+```mermaid
 erDiagram
     USERS {
         INT id
@@ -185,3 +186,4 @@ erDiagram
     RECIPES ||--o{ INSTRUCTIONS : "has"
     RECIPES ||--o{ INGREDIENTS : "has"
     CATEGORIES ||--o{ RECIPES : "categorizes"
+```
