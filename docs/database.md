@@ -70,3 +70,64 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+To add a `categories` table and link it to the `recipes` table, we can use a foreign key relationship. Here’s how we can amend the database structure:
+
+---
+
+### **Updated Database Schema**
+
+#### **1. Categories Table**
+This table will store the categories:
+```sql
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+```
+
+#### **2. Modify Recipes Table**
+Add a foreign key to link a recipe to a category:
+```sql
+ALTER TABLE recipes ADD COLUMN category_id INT, ADD FOREIGN KEY (category_id) REFERENCES categories(id);
+```
+
+---
+
+### **Relationship Details**
+1. **One-to-Many Relationship**:
+   - Each category can have multiple recipes.
+   - Each recipe belongs to a single category (optional, as some recipes may not fit a category initially).
+
+2. **Default Behavior**:
+   - Set `category_id` as nullable (`NULL`) for recipes that don’t belong to a category.
+
+---
+
+### **Seeding Categories**
+Use a seeder script to populate categories:
+```python
+from app import db
+from app.models import Category
+
+def seed_categories():
+    categories = ["Desserts", "Main Courses", "Appetizers", "Drinks", "Snacks"]
+    for category_name in categories:
+        category = Category(name=category_name)
+        db.session.add(category)
+    db.session.commit()
+
+if __name__ == "__main__":
+    seed_categories()
+```
+
+
+
+### **Using Categories in Queries**
+1. **Query Recipes by Category**:
+   ```python
+   category = Category.query.filter_by(name="Desserts").first()
+   recipes = Recipe.query.filter_by(category_id=category.id).all()
+   ```
+
+2. **Include Category in Recipe Forms**:
+   Add a dropdown to select the category when creating or editing a recipe.
