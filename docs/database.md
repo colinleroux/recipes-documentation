@@ -133,58 +133,55 @@ if __name__ == "__main__":
    Add a dropdown to select the category when creating or editing a recipe.
 
 ## Database Structure
-
-```mermaid
 erDiagram
     USERS {
-        INT id PK
-        VARCHAR username UNIQUE
+        INT id
+        VARCHAR username
         VARCHAR password_hash
         VARCHAR email
         TIMESTAMP created_at
     }
 
     RECIPES {
-        INT id PK
+        INT id
         VARCHAR name
         TEXT notes
         VARCHAR image
         VARCHAR author
-        INT category_id FK
+        INT category_id
         INT serves
         BOOLEAN is_favorite
     }
 
     IMAGES {
-        INT id PK
-        INT recipe_id FK
+        INT id
+        INT recipe_id
         VARCHAR image
         VARCHAR image_description
         INT image_order_number
     }
 
     INSTRUCTIONS {
-        INT id PK
-        INT recipe_id FK
+        INT id
+        INT recipe_id
         INT instruction_id
         INT instruction_order
         TEXT instruction_step
     }
 
     INGREDIENTS {
-        INT id PK
-        INT recipe_id FK
+        INT id
+        INT recipe_id
         TEXT quantity
         VARCHAR ingredient_name
     }
 
     CATEGORIES {
-        INT id PK
-        VARCHAR name UNIQUE
+        INT id
+        VARCHAR name
     }
 
     RECIPES ||--o{ IMAGES : "has"
     RECIPES ||--o{ INSTRUCTIONS : "has"
     RECIPES ||--o{ INGREDIENTS : "has"
-    CATEGORIES ||--o{ RECIPES : "has"
-```
+    CATEGORIES ||--o{ RECIPES : "categorizes"
