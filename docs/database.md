@@ -187,3 +187,153 @@ erDiagram
     RECIPES ||--o{ INGREDIENTS : "has"
     CATEGORIES ||--o{ RECIPES : "categorizes"
 ```
+
+## SQAlchemy
+
+1. **Install Required Packages**
+   Ensure you have the `mysql-connector-python` or `pymysql` library installed to work with MySQL. Run one of the following commands:
+
+   ```bash
+   pip install flask-mysql
+   pip install pymysql
+   ```
+
+   Or, if you prefer `mysqlclient` (a C-based MySQL library):
+
+   ```bash
+   pip install mysqlclient
+   ```
+
+2. **Update Your Configuration**
+   Modify the `SQLALCHEMY_DATABASE_URI` to use a MySQL connection string.
+
+3. **Code with MySQL Configuration**
+   Here’s the updated code for MySQL:
+
+   ```python
+   import os
+   from flask import Flask
+   from flask_sqlalchemy import SQLAlchemy
+   from sqlalchemy.sql import func
+
+   # App and Database Setup
+   app = Flask(__name__)
+   app.config['SQLALCHEMY_DATABASE_URI'] = (
+       "mysql+pymysql://<username>:<password>@<hostname>/<database_name>"
+   )
+   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+   db = SQLAlchemy(app)
+
+   # User Model
+   class User(db.Model):
+       __tablename__ = 'users'
+       id = db.Column(db.Integer, primary_key=True)
+       username = db.Column(db.String(100), nullable=False, unique=True)
+       password_hash = db.Column(db.String(255), nullable=False)
+       email = db.Column(db.String(255), unique=True)
+       created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
+       def __repr__(self):
+           return f'<User {self.username}>'
+
+   # Category Model
+   class Category(db.Model):
+       __tablename__ = 'categories'
+       id = db.Column(db.Integer, primary_key=True)
+       name = db.Column(db.String(100), nullable=False, unique=True)
+       recipes = db.relationship('Recipe', back_populates='category')
+
+       def __repr__(self):
+           return f'<Category {self.name}>'
+
+   # Recipe Model
+   class Recipe(db.Model):
+       __tablename__ = 'recipes'
+       id = db.Column(db.Integer, primary_key=True)
+       name = db.Column(db.String(255), nullable=False)
+       notes = db.Column(db.Text)
+       detail = db.Column(db.Text)
+       image = db.Column(db.String(255))
+       author = db.Column(db.String(100), nullable=False)
+       category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+       serves = db.Column(db.Integer, nullable=True)
+       is_favorite = db.Column(db.Boolean, default=False)
+       created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
+       category = db.relationship('Category', back_populates='recipes')
+       images = db.relationship('Image', back_populates='recipe', cascade='all, delete')
+       instructions = db.relationship('Instruction', back_populates='recipe', cascade='all, delete')
+       ingredients = db.relationship('Ingredient', back_populates='recipe', cascade='all, delete')
+
+       def __repr__(self):
+           return f'<Recipe {self.name}>'
+
+   # Image Model
+   class Image(db.Model):
+       __tablename__ = 'images'
+       id = db.Column(db.Integer, primary_key=True)
+       recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+       image = db.Column(db.String(255), nullable=False)
+       image_description = db.Column(db.String(255))
+       image_order_number = db.Column(db.Integer, nullable=True)
+
+       recipe = db.relationship('Recipe', back_populates='images')
+
+       def __repr__(self):
+           return f'<Image for Recipe {self.recipe_id}>'
+
+   # Instruction Model
+   class Instruction(db.Model):
+       __tablename__ = 'instructions'
+       id = db.Column(db.Integer, primary_key=True)
+       recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+       instruction_order = db.Column(db.Integer, nullable=False)
+       instruction_step = db.Column(db.Text, nullable=False)
+
+       recipe = db.relationship('Recipe', back_populates='instructions')
+
+       def __repr__(self):
+           return f'<Instruction {self.instruction_order} for Recipe {self.recipe_id}>'
+
+   # Ingredient Model
+   class Ingredient(db.Model):
+       __tablename__ = 'ingredients'
+       id = db.Column(db.Integer, primary_key=True)
+       recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+       quantity = db.Column(db.String(100), nullable=False)
+       ingredient_name = db.Column(db.String(255), nullable=False)
+
+       recipe = db.relationship('Recipe', back_populates='ingredients')
+
+       def __repr__(self):
+           return f'<Ingredient {self.ingredient_name} for Recipe {self.recipe_id}>'
+
+   # Initialize the database
+   if __name__ == '__main__':
+       with app.app_context():
+           db.create_all()
+   ```
+
+---
+
+### **Notes**
+1. Replace `<username>`, `<password>`, `<hostname>`, and `<database_name>` in the `SQLALCHEMY_DATABASE_URI` with your MySQL credentials and database name.
+   - Example:
+     ```python
+     app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:password@localhost/recipe_app"
+     ```
+
+2. **Create the Database**:
+   - Log in to MySQL and create the database before running the app:
+     ```sql
+     CREATE DATABASE recipe_app;
+     ```
+
+3. **Test the Setup**:
+   - Run the Flask app locally and ensure the tables are created in your MySQL database.
+   - Use sample data to test the relationships.
+
+4. **PythonAnywhere**:
+   - Update the `SQLALCHEMY_DATABASE_URI` for your PythonAnywhere database credentials when deploying.
+
